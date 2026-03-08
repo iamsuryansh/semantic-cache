@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "semantic-cache"
+version = "0.1.0"
+description = "Semantic caching for LLM calls via a simple decorator"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = []  # zero mandatory deps
+
+[project.optional-dependencies]
+# Local embeddings + in-memory backend (good for dev / no Redis)
+default = [
+    "fastembed>=0.3",
+    "numpy>=1.24",
+]
+# Redis backend only (bring your own embedder)
+redis = [
+    "redis>=5.0",
+    "numpy>=1.24",
+]
+# Everything
+all = [
+    "fastembed>=0.3",
+    "redis>=5.0",
+    "numpy>=1.24",
+]
+# Dev / test
+dev = [
+    "fastembed>=0.3",
+    "redis>=5.0",
+    "numpy>=1.24",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourname/semantic-cache"
+
+[tool.hatch.build.targets.wheel]
+packages = ["semantic_cache"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+ignore_missing_imports = true
