@@ -90,7 +90,11 @@ class RedisBackend(CacheBackend):
         ]
 
     def _index_definition(self):
-        from redis.commands.search.indexDefinition import IndexDefinition, IndexType
+        # redis-py changed this module path between releases.
+        try:
+            from redis.commands.search.index_definition import IndexDefinition, IndexType
+        except ImportError:
+            from redis.commands.search.indexDefinition import IndexDefinition, IndexType
         return IndexDefinition(prefix=[self._prefix], index_type=IndexType.HASH)
 
     # --------------------------------------------------------------- internal
@@ -121,8 +125,8 @@ class RedisBackend(CacheBackend):
         from redis.commands.search.query import Query
 
         query = (
-            Query("*=>[KNN 1 @vec $BLOB AS __score]")
-            .return_fields("resp", "__score")
+            Query("*=>[KNN 1 @vec $BLOB AS score]")
+            .return_fields("resp", "score")
             .dialect(2)
         )
         results = self._sync.ft(self._index).search(
@@ -133,7 +137,7 @@ class RedisBackend(CacheBackend):
             return None
 
         doc = results.docs[0]
-        similarity = self._parse_score(doc.__score)
+        similarity = self._parse_score(doc.score)
 
         if similarity >= threshold:
             self._sync.incr(f"{self._ns}:hits")
@@ -179,8 +183,8 @@ class RedisBackend(CacheBackend):
 
         client = await self._get_async()
         query = (
-            Query("*=>[KNN 1 @vec $BLOB AS __score]")
-            .return_fields("resp", "__score")
+            Query("*=>[KNN 1 @vec $BLOB AS score]")
+            .return_fields("resp", "score")
             .dialect(2)
         )
         results = await client.ft(self._index).search(
@@ -191,7 +195,7 @@ class RedisBackend(CacheBackend):
             return None
 
         doc = results.docs[0]
-        similarity = self._parse_score(doc.__score)
+        similarity = self._parse_score(doc.score)
 
         if similarity >= threshold:
             await client.incr(f"{self._ns}:hits")
