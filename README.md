@@ -1,3 +1,4 @@
+### moved to https://github.com/iamsuryansh/semantic-cache-lib
 # semantic-cache
 
 Semantic caching for LLM calls via a decorator. Wraps any function that takes a string prompt and returns a string response — if a semantically similar prompt has been seen before, the cached response is returned instantly without calling the underlying function.
